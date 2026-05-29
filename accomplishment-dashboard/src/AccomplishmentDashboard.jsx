@@ -110,9 +110,12 @@ export default function AccomplishmentDashboard() {
   const [lastSaved, setLastSaved] = useState(null);
 
   const saveEntries = (newEntries) => {
-    setEntries(newEntries);
-    localStorage.setItem('psa-accomplishments', JSON.stringify(newEntries));
-    setLastSaved(getPHTNow());
+    setEntries(prev => {
+      const next = typeof newEntries === 'function' ? newEntries(prev) : newEntries;
+      localStorage.setItem('psa-accomplishments', JSON.stringify(next));
+      setLastSaved(getPHTNow());
+      return next;
+    });
   };
 
   const handleAddEntry = (e) => {
@@ -127,12 +130,15 @@ export default function AccomplishmentDashboard() {
       createdAt: phtNow.getTime()
     };
 
-    const currentList = entries[activeKey] || [];
-    const updatedList = [newEntry, ...currentList].sort((a, b) => new Date(b.date) - new Date(a.date) || b.createdAt - a.createdAt);
-
-    saveEntries({
-      ...entries,
-      [activeKey]: updatedList
+    saveEntries(prevEntries => {
+      const currentList = prevEntries[activeKey] || [];
+      const updatedList = [newEntry, ...currentList].sort((a, b) => {
+        if (a.date !== b.date) {
+          return b.date.localeCompare(a.date);
+        }
+        return b.createdAt - a.createdAt;
+      });
+      return { ...prevEntries, [activeKey]: updatedList };
     });
 
     setInputValue('');
@@ -140,10 +146,12 @@ export default function AccomplishmentDashboard() {
 
   const handleDeleteEntry = (id) => {
     if (!confirm('Are you sure you want to delete this entry?')) return;
-    const currentList = entries[activeKey] || [];
-    saveEntries({
-      ...entries,
-      [activeKey]: currentList.filter(e => e.id !== id)
+    saveEntries(prevEntries => {
+      const currentList = prevEntries[activeKey] || [];
+      return {
+        ...prevEntries,
+        [activeKey]: currentList.filter(e => e.id !== id)
+      };
     });
   };
 
@@ -186,12 +194,15 @@ export default function AccomplishmentDashboard() {
         createdAt: phtNow.getTime()
       }));
 
-      const currentList = entries[activeKey] || [];
-      const updatedList = [...newEntriesList, ...currentList].sort((a, b) => new Date(b.date) - new Date(a.date) || b.createdAt - a.createdAt);
-
-      saveEntries({
-        ...entries,
-        [activeKey]: updatedList
+      saveEntries(prevEntries => {
+        const currentList = prevEntries[activeKey] || [];
+        const updatedList = [...newEntriesList, ...currentList].sort((a, b) => {
+          if (a.date !== b.date) {
+            return b.date.localeCompare(a.date);
+          }
+          return b.createdAt - a.createdAt;
+        });
+        return { ...prevEntries, [activeKey]: updatedList };
       });
 
     } catch (err) {
@@ -356,7 +367,7 @@ export default function AccomplishmentDashboard() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-gray-900 whitespace-pre-wrap">{entry.text}</p>
                     <div className="flex items-center gap-2 mt-1.5">
-                      <span className="text-xs text-gray-500">{format(new Date(entry.date), 'MMM d, yyyy')}</span>
+                      <span className="text-xs text-gray-500">{format(new Date(entry.date + 'T12:00:00'), 'MMM d, yyyy')}</span>
                       <span className={`text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded-sm ${CATEGORY_COLORS[entry.category]}`}>
                         {entry.category}
                       </span>
@@ -364,7 +375,7 @@ export default function AccomplishmentDashboard() {
                   </div>
                   <button
                     onClick={() => handleDeleteEntry(entry.id)}
-                    className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1"
+                    className="text-gray-400 hover:text-red-500 opacity-0 focus-visible:opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all p-1"
                     title="Delete entry"
                   >
                     <Trash2 className="w-4 h-4" />
