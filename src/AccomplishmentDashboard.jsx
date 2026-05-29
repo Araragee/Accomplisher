@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { format, startOfDay, differenceInDays } from 'date-fns';
 import { DownloadCloud, FileText, Send, Trash2, Zap, Cloud, CloudOff } from 'lucide-react';
 
+import Button from './components/Button';
+import Modal from './components/Modal';
+
 const CATEGORIES = ['Dev', 'Data', 'Docs', 'Bugfix', 'Meeting', 'Other'];
 const CATEGORY_COLORS = {
   'Dev': 'bg-blue-500 text-blue-50',
@@ -27,10 +30,21 @@ const getPHTNow = () => {
 };
 
 const getPeriodDetails = (dateStr, tab) => {
+  if (!dateStr || typeof dateStr !== 'string' || !/^\d{4}-\d{2}$/.test(dateStr)) {
+    console.warn(`Invalid dateStr provided to getPeriodDetails: ${dateStr}. Using current date as fallback.`);
+    const d = new Date();
+    dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  }
+
   // dateStr is basically 'YYYY-MM'
   const [year, month] = dateStr.split('-');
-  const y = parseInt(year);
-  const m = parseInt(month) - 1; // 0-indexed for Date
+  const y = parseInt(year, 10);
+  const m = parseInt(month, 10) - 1; // 0-indexed for Date
+
+  if (isNaN(y) || isNaN(m)) {
+    console.warn(`Could not parse year/month from dateStr: ${dateStr}.`);
+    return { label: 'Invalid Period', start: new Date(), end: new Date() };
+  }
 
   if (tab === 'A') {
     const start = new Date(y, m, 11);
@@ -53,6 +67,11 @@ const getPeriodDetails = (dateStr, tab) => {
 };
 
 const determineCurrentPeriod = (date) => {
+  if (!(date instanceof Date) || isNaN(date)) {
+    console.warn('Invalid date passed to determineCurrentPeriod, falling back to current date.');
+    date = new Date();
+  }
+
   const day = date.getDate();
   const m = date.getMonth();
   const y = date.getFullYear();
@@ -109,11 +128,28 @@ export default function AccomplishmentDashboard() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
 
+  // Modal states
+  const [entryToDelete, setEntryToDelete] = useState(null);
+  const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: '', message: '' });
+
+  const showAlert = (title, message) => {
+    setAlertConfig({ isOpen: true, title, message });
+  };
+
+  const closeAlert = () => {
+    setAlertConfig({ ...alertConfig, isOpen: false });
+  };
+
   const saveEntries = (newEntries) => {
     setEntries(prev => {
       const next = typeof newEntries === 'function' ? newEntries(prev) : newEntries;
-      localStorage.setItem('psa-accomplishments', JSON.stringify(next));
-      setLastSaved(getPHTNow());
+      try {
+        localStorage.setItem('psa-accomplishments', JSON.stringify(next));
+        setLastSaved(getPHTNow());
+      } catch (err) {
+        console.error("Failed to save entries to localStorage:", err);
+        showAlert("Save Error", "Could not save your entries. This might be due to private browsing mode or storage limits.");
+      }
       return next;
     });
   };
@@ -144,15 +180,20 @@ export default function AccomplishmentDashboard() {
     setInputValue('');
   };
 
-  const handleDeleteEntry = (id) => {
-    if (!confirm('Are you sure you want to delete this entry?')) return;
+  const requestDeleteEntry = (id) => {
+    setEntryToDelete(id);
+  };
+
+  const confirmDeleteEntry = () => {
+    if (!entryToDelete) return;
     saveEntries(prevEntries => {
       const currentList = prevEntries[activeKey] || [];
       return {
         ...prevEntries,
-        [activeKey]: currentList.filter(e => e.id !== id)
+        [activeKey]: currentList.filter(e => e.id !== entryToDelete)
       };
     });
+    setEntryToDelete(null);
   };
 
   const handleAutoGenerate = async () => {
@@ -207,7 +248,7 @@ export default function AccomplishmentDashboard() {
 
     } catch (err) {
       console.error(err);
-      alert("Failed to auto-generate: " + err.message);
+      showAlert("Generation Failed", "Failed to auto-generate: " + err.message);
     } finally {
       setIsGenerating(false);
     }
@@ -215,26 +256,26 @@ export default function AccomplishmentDashboard() {
 
   const sendPrompt = (promptText) => {
     console.log("SEND PROMPT:", promptText);
-    alert(`Action dispatched:\n\n${promptText}`);
+    showAlert("Action Dispatched", promptText);
   };
 
   const handleExportDrive = () => {
     const list = entries[activeKey] || [];
-    if (list.length === 0) return alert("No entries to export.");
+    if (list.length === 0) return showAlert("Notice", "No entries to export.");
     const bullets = list.map(e => `- [${e.date}] [${e.category}] ${e.text}`).join('\n');
     sendPrompt(`Save my ${periodDetails.label} accomplishments to Google Drive as a formatted Google Doc titled 'Accomplishments – ${periodDetails.label}'. Here are the entries:\n${bullets}`);
   };
 
   const handleExportResume = () => {
     const list = entries[activeKey] || [];
-    if (list.length === 0) return alert("No entries to export.");
+    if (list.length === 0) return showAlert("Notice", "No entries to export.");
     const bullets = list.map(e => `- ${e.text}`).join('\n');
     sendPrompt(`Turn my accomplishments for ${periodDetails.label} into polished resume bullet points using strong action verbs and quantified impact where possible:\n${bullets}`);
   };
 
   const handleExportSummary = () => {
     const list = entries[activeKey] || [];
-    if (list.length === 0) return alert("No entries to export.");
+    if (list.length === 0) return showAlert("Notice", "No entries to export.");
     const bullets = list.map(e => `- ${e.text}`).join('\n');
     sendPrompt(`Write a short 2–3 sentence professional summary of my work this period (${periodDetails.label}):\n${bullets}`);
   };
@@ -264,18 +305,22 @@ export default function AccomplishmentDashboard() {
             <p className="text-gray-500 text-sm mt-1">{periodDetails.label} • {daysRemaining} days remaining</p>
           </div>
           <div className="flex bg-gray-200 p-1 rounded-md">
-            <button
+            <Button
+              variant={activeTab === 'A' ? 'outline' : 'ghost'}
+              size="sm"
               onClick={() => setActiveTab('A')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-sm transition-colors ${activeTab === 'A' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
+              className={activeTab === 'A' ? 'shadow-sm' : ''}
             >
               11–25
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={activeTab === 'B' ? 'outline' : 'ghost'}
+              size="sm"
               onClick={() => setActiveTab('B')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-sm transition-colors ${activeTab === 'B' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'}`}
+              className={activeTab === 'B' ? 'shadow-sm' : ''}
             >
               26–10
-            </button>
+            </Button>
           </div>
         </header>
 
@@ -314,14 +359,16 @@ export default function AccomplishmentDashboard() {
         <div className="bg-white border border-gray-200 rounded-md overflow-hidden">
           <div className="p-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between">
             <h2 className="text-lg font-medium text-gray-800">Current Period Entries</h2>
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleAutoGenerate}
               disabled={isGenerating}
-              className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50 transition-colors bg-blue-50 px-3 py-1.5 rounded-md border border-blue-100"
+              className="text-blue-600 bg-blue-50 border-blue-100 hover:text-blue-700 hover:bg-blue-100 flex gap-1.5"
             >
               <Zap className="w-4 h-4" />
               {isGenerating ? 'Generating...' : 'Auto-generate ↗'}
-            </button>
+            </Button>
           </div>
 
           <div className="p-4 border-b border-gray-200">
@@ -348,9 +395,9 @@ export default function AccomplishmentDashboard() {
                   onChange={(e) => setInputDate(e.target.value)}
                   className="bg-white border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block p-2"
                 />
-                <button type="submit" className="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-md text-sm px-4 py-2 transition-colors">
+                <Button type="submit" variant="primary">
                   Add
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -373,13 +420,15 @@ export default function AccomplishmentDashboard() {
                       </span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleDeleteEntry(entry.id)}
-                    className="text-gray-400 hover:text-red-500 opacity-0 focus-visible:opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all p-1"
+                  <Button
+                    variant="dangerGhost"
+                    size="icon"
+                    onClick={() => requestDeleteEntry(entry.id)}
+                    className="opacity-0 focus-visible:opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all"
                     title="Delete entry"
                   >
                     <Trash2 className="w-4 h-4" />
-                  </button>
+                  </Button>
                 </div>
               ))
             )}
@@ -388,18 +437,46 @@ export default function AccomplishmentDashboard() {
 
         {/* Export Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button onClick={handleExportDrive} className="flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium rounded-md text-sm px-4 py-2.5 transition-colors">
+          <Button variant="outline" onClick={handleExportDrive} className="flex justify-center gap-2">
             <DownloadCloud className="w-4 h-4" /> Save to Google Drive ↗
-          </button>
-          <button onClick={handleExportResume} className="flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium rounded-md text-sm px-4 py-2.5 transition-colors">
+          </Button>
+          <Button variant="outline" onClick={handleExportResume} className="flex justify-center gap-2">
             <FileText className="w-4 h-4" /> Resume bullets ↗
-          </button>
-          <button onClick={handleExportSummary} className="flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 font-medium rounded-md text-sm px-4 py-2.5 transition-colors">
+          </Button>
+          <Button variant="outline" onClick={handleExportSummary} className="flex justify-center gap-2">
             <Send className="w-4 h-4" /> Period summary ↗
-          </button>
+          </Button>
         </div>
 
       </div>
+
+      {/* Modals */}
+      <Modal
+        isOpen={!!entryToDelete}
+        onClose={() => setEntryToDelete(null)}
+        title="Delete Entry"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => setEntryToDelete(null)}>Cancel</Button>
+            <Button variant="danger" onClick={confirmDeleteEntry}>Delete</Button>
+          </>
+        }
+      >
+        <p className="text-gray-600">Are you sure you want to delete this entry? This action cannot be undone.</p>
+      </Modal>
+
+      <Modal
+        isOpen={alertConfig.isOpen}
+        onClose={closeAlert}
+        title={alertConfig.title}
+        footer={
+          <Button variant="primary" onClick={closeAlert}>OK</Button>
+        }
+      >
+        <div className="text-gray-600 whitespace-pre-wrap font-mono text-sm bg-gray-50 p-3 rounded border border-gray-200">
+          {alertConfig.message}
+        </div>
+      </Modal>
     </div>
   );
 }
