@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "preview": "vite preview",
     "tauri": "tauri"
@@ -37,6 +38,8 @@
     "globals": "^17.6.0",
     "postcss": "^8.5.15",
     "tailwindcss": "^4.3.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.60.1",
     "vite": "^8.0.12"
   }
 }
