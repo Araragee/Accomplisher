@@ -1,75 +1,174 @@
 @import "tailwindcss";
 
-@theme {
-  --color-background: #0c1324;
-  --color-surface: #0c1324;
-  --color-surface-bright: #33394c;
-  --color-surface-dim: #0c1324;
-  --color-surface-container-lowest: #070d1f;
-  --color-surface-container-low: #151b2d;
-  --color-surface-container: #191f31;
-  --color-surface-container-high: #23293c;
-  --color-surface-container-highest: #2e3447;
-  --color-on-background: #dce1fb;
-  --color-on-surface: #dce1fb;
-  --color-on-surface-variant: #bbcabf;
-  --color-primary: #4edea3;
-  --color-primary-container: #10b981;
-  --color-on-primary: #003824;
-  --color-on-primary-container: #00422b;
-  --color-secondary: #adc6ff;
-  --color-secondary-container: #0566d9;
-  --color-on-secondary: #002e6a;
-  --color-on-secondary-container: #e6ecff;
-  --color-outline: #86948a;
-  --color-outline-variant: #3c4a42;
+/* Class-based dark mode (warm dusk). Tokens swap under .dark; most utilities
+   need no dark: variant because the CSS vars below carry the theme. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-headline: "Geist", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+/* ---- Soft Sage / Spa Calm tokens (light, default) ----
+   Neutrals tinted toward sage (hue ~150) at low chroma. One terracotta
+   accent (hue ~52) for actions + current state only. No glow, no glass. */
+:root {
+  color-scheme: light;
+
+  --canvas:       oklch(0.965 0.008 150);
+  --surface:      oklch(0.987 0.006 150);
+  --panel:        oklch(0.945 0.009 150);
+  --raised:       oklch(0.995 0.004 150);
+
+  --ink:          oklch(0.32 0.014 150);
+  --muted:        oklch(0.52 0.012 150);
+  --subtle:       oklch(0.63 0.010 150);
+  --faint:        oklch(0.72 0.008 150);
+
+  --line:         oklch(0.90 0.008 150);
+  --line-strong:  oklch(0.83 0.010 150);
+
+  --accent:       oklch(0.64 0.115 52);
+  --accent-hover: oklch(0.59 0.120 50);
+  --accent-active:oklch(0.55 0.120 48);
+  --accent-soft:  oklch(0.93 0.035 55);
+  --on-accent:    oklch(0.985 0.012 80);
+
+  --sage:         oklch(0.62 0.070 150);
+  --sage-soft:    oklch(0.93 0.030 150);
+
+  --warn:         oklch(0.74 0.100 75);
+  --warn-soft:    oklch(0.94 0.040 80);
+  --danger:       oklch(0.56 0.110 28);
+  --danger-soft:  oklch(0.93 0.035 30);
+  --info:         oklch(0.62 0.060 230);
+
+  --shadow-color: 150 0.02 0.30;
 }
 
-:root {
+/* ---- Warm dusk (dark) ---- warm charcoal, never navy */
+.dark {
   color-scheme: dark;
-  background-color: #0c1324;
-  color: #dce1fb;
-  font-family: var(--font-sans);
+
+  --canvas:       oklch(0.20 0.008 70);
+  --surface:      oklch(0.24 0.008 70);
+  --panel:        oklch(0.175 0.008 70);
+  --raised:       oklch(0.27 0.009 70);
+
+  --ink:          oklch(0.92 0.012 80);
+  --muted:        oklch(0.74 0.012 80);
+  --subtle:       oklch(0.62 0.010 80);
+  --faint:        oklch(0.50 0.010 80);
+
+  --line:         oklch(0.31 0.008 70);
+  --line-strong:  oklch(0.40 0.010 70);
+
+  --accent:       oklch(0.70 0.110 52);
+  --accent-hover: oklch(0.75 0.110 54);
+  --accent-active:oklch(0.66 0.110 50);
+  --accent-soft:  oklch(0.30 0.040 50);
+  --on-accent:    oklch(0.20 0.020 60);
+
+  --sage:         oklch(0.72 0.070 150);
+  --sage-soft:    oklch(0.30 0.030 150);
+
+  --warn:         oklch(0.78 0.100 80);
+  --warn-soft:    oklch(0.32 0.040 80);
+  --danger:       oklch(0.64 0.110 30);
+  --danger-soft:  oklch(0.32 0.040 30);
+  --info:         oklch(0.70 0.060 230);
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-panel: var(--panel);
+  --color-raised: var(--raised);
+
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-faint: var(--faint);
+
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-active: var(--accent-active);
+  --color-accent-soft: var(--accent-soft);
+  --color-on-accent: var(--on-accent);
+
+  --color-sage: var(--sage);
+  --color-sage-soft: var(--sage-soft);
+
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+  /* overlays only; surfaces use borders, not shadows */
+  --shadow-soft: 0 1px 2px oklch(0.30 0.02 150 / 0.06), 0 10px 30px oklch(0.30 0.02 150 / 0.10);
+}
+
+html, body, #root {
+  min-height: 100vh;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
-  background-color: #0c1324;
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-.glass-card {
-  background: rgba(25, 31, 49, 0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(30, 41, 59, 0.5);
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
 }
 
-.emerald-glow {
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+/* Restrained, calm scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--line-strong) 70%, transparent);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--line-strong);
+  background-clip: padding-box;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+/* Reusable focus ring for interactive elements */
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--canvas), 0 0 0 4px color-mix(in oklab, var(--accent) 45%, transparent);
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+/* Motion: short, ease-out, state-signalling only */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.985); }
+  to { opacity: 1; transform: none; }
 }
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 10px;
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
 }
-
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  display: inline-block;
-  vertical-align: middle;
-  line-height: 1;
+@keyframes rowIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

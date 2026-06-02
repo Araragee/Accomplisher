@@ -3,21 +3,28 @@ use std::process::Command;
 use std::path::PathBuf;
 
 #[tauri::command]
-fn get_ml_suggestions(app_handle: tauri::AppHandle) -> Result<String, String> {
+fn get_ml_suggestions(
+    app_handle: tauri::AppHandle,
+    member_id: Option<String>,
+    mode: Option<String>,
+) -> Result<String, String> {
+    let member = member_id.unwrap_or_else(|| "me".to_string());
+    let run_mode = mode.unwrap_or_else(|| "individual".to_string());
+
     let app_data_dir = app_handle.path().app_data_dir()
         .map_err(|e| e.to_string())?;
-    
+
     // Create directory if it doesn't exist
     std::fs::create_dir_all(&app_data_dir).map_err(|e| e.to_string())?;
     let db_path = app_data_dir.join("accomplishments.db");
-    
+
     // Resolve resource paths
     let resource_dir = app_handle.path().resource_dir()
         .map_err(|e| e.to_string())?;
-    
+
     let script_path = resource_dir.join("src").join("thinker_sidecar.py");
     let seed_csv_path = resource_dir.join("src").join("seed_data.csv");
-    
+
     let output = if script_path.exists() {
         // Executed inside the packaged app resources
         Command::new("python3")
@@ -26,6 +33,10 @@ fn get_ml_suggestions(app_handle: tauri::AppHandle) -> Result<String, String> {
             .arg(&db_path)
             .arg("--seed-csv")
             .arg(&seed_csv_path)
+            .arg("--member-id")
+            .arg(&member)
+            .arg("--mode")
+            .arg(&run_mode)
             .output()
             .map_err(|e| format!("Failed to run sidecar script: {}", e))?
     } else {
@@ -39,6 +50,10 @@ fn get_ml_suggestions(app_handle: tauri::AppHandle) -> Result<String, String> {
                 .arg(&db_path)
                 .arg("--seed-csv")
                 .arg(&local_csv)
+                .arg("--member-id")
+                .arg(&member)
+                .arg("--mode")
+                .arg(&run_mode)
                 .output()
                 .map_err(|e| format!("Failed to run local dev script: {}", e))?
         } else {
@@ -96,6 +111,32 @@ pub fn run() {
                                 ('IPCR-A-102', 'Data Processing & R Scripting', 32, 'bg-blue-400'),
                                 ('IPCR-A-101', 'Technical Documentation', 16, 'bg-amber-400'),
                                 ('IPCR-ADMIN', 'Administrative & Support', 16, 'bg-purple-400');
+                        ",
+                        kind: tauri_plugin_sql::MigrationKind::Up,
+                    },
+                    tauri_plugin_sql::Migration {
+                        version: 2,
+                        description: "add_members_objectives_and_member_scope",
+                        sql: "
+                            ALTER TABLE payroll_accomplishments ADD COLUMN member_id TEXT DEFAULT 'me';
+                            ALTER TABLE wfh_logs ADD COLUMN member_id TEXT DEFAULT 'me';
+                            CREATE TABLE IF NOT EXISTS members (
+                                id TEXT PRIMARY KEY,
+                                name TEXT,
+                                role TEXT,
+                                created_at INTEGER
+                            );
+                            INSERT OR IGNORE INTO members (id, name, role, created_at) VALUES
+                                ('me', 'Dave', 'Front-end Developer', 0);
+                            CREATE TABLE IF NOT EXISTS objectives (
+                                id TEXT PRIMARY KEY,
+                                member_id TEXT,
+                                title TEXT,
+                                target_code TEXT,
+                                status TEXT,
+                                progress INTEGER,
+                                created_at INTEGER
+                            );
                         ",
                         kind: tauri_plugin_sql::MigrationKind::Up,
                     }],
