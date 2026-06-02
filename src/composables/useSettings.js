@@ -44,7 +44,7 @@ export function useSettings() {
 
   const exportData = async () => {
     const data = await db.exportAll();
-    downloadText('accomplisher-backup.json', JSON.stringify(data, null, 2));
+    downloadText('cbs-do-it-backup.json', JSON.stringify(data, null, 2));
     toast('Backup downloaded');
   };
 

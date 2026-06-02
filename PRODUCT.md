@@ -1,4 +1,4 @@
-# PRODUCT.md — Accomplisher
+# PRODUCT.md — CBS DO IT
 
 register: product
 

@@ -36,7 +36,7 @@ export function Sidebar() {
         <span className="grid size-7 place-items-center rounded-lg bg-accent text-on-accent">
           <Check className="size-4" strokeWidth={2.5} />
         </span>
-        <span className="text-[0.9375rem] font-semibold tracking-tight text-ink">Accomplisher</span>
+        <span className="text-[0.9375rem] font-semibold tracking-tight text-ink">CBS DO IT</span>
       </div>
 
       <nav className="flex-1 space-y-0.5 px-3 py-3">

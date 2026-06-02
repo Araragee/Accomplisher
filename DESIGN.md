@@ -1,4 +1,4 @@
-# DESIGN.md — Accomplisher
+# DESIGN.md — CBS DO IT
 
 Soft Sage / Spa Calm. Light-first, with a warm dusk dark variant. Restrained color: sage-tinted neutrals carry the surface, one terracotta accent for actions and current state only. Flat. Hairline borders. No glow, no glass, no neon.
 
