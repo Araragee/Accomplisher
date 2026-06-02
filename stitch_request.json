@@ -1,0 +1,16 @@
+{
+  "projectId": "14342727688935675541",
+  "selectedScreenIds": [
+    "17606310023743593816"
+  ],
+  "prompt": "Improve the design, typography, spacing, colors, and layout of this Accomplishments Dashboard. Recommend a modern, premium, clean UI layout with beautiful typography, excellent hierarchy, elegant card components, and sophisticated color styling (such as glassmorphism, refined dark mode, or sleek minimalist slate).",
+  "variantOptions": {
+    "aspects": [
+      "LAYOUT",
+      "COLOR_SCHEME",
+      "TEXT_FONT"
+    ],
+    "creativeRange": "EXPLORE",
+    "variantCount": 3
+  }
+}
