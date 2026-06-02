@@ -5,14 +5,23 @@ import sqlite3
 import random
 
 # Try to import ML libraries; fall back to pure-Python if unavailable.
-try:
-    import pandas as pd
-    import numpy as np
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.ensemble import RandomForestClassifier
-    HAS_ML = True
-except ImportError:
-    HAS_ML = False
+# Heavy ML library imports are deferred to main and predict_ml functions to prevent 1.4s startup lag.
+HAS_ML = None
+
+def check_ml_available():
+    global HAS_ML
+    if HAS_ML is not None:
+        return HAS_ML
+    try:
+        import pandas as pd
+        import numpy as np
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        from sklearn.ensemble import RandomForestClassifier
+        HAS_ML = True
+    except ImportError:
+        HAS_ML = False
+    return HAS_ML
+
 
 
 def load_seed_data(seed_csv_path):
@@ -85,8 +94,14 @@ def get_db_logs(db_path, member_id, mode):
 
 def predict_ml(seed_tasks, user_logs):
     """TF-IDF + Random Forest with deficit-weighted candidate ranking."""
+    import pandas as pd
+    import numpy as np
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.ensemble import RandomForestClassifier
+
     all_data = seed_tasks + user_logs
     df = pd.DataFrame(all_data)
+
 
     vectorizer = TfidfVectorizer(max_features=100)
     X = vectorizer.fit_transform(df['text']).toarray()
@@ -150,7 +165,7 @@ def main():
     seed_tasks = load_seed_data(opts["seed_csv"])
     user_logs = get_db_logs(opts["db_path"], opts["member_id"], opts["mode"]) if opts["db_path"] else []
 
-    if HAS_ML and len(user_logs) > 2:
+    if len(user_logs) > 2 and check_ml_available():
         suggestions = predict_ml(seed_tasks, user_logs)
     else:
         suggestions = predict_fallback(seed_tasks, user_logs)
