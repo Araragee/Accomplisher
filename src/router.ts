@@ -1,4 +1,4 @@
-import React, { useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 
 // Minimal hash router. No dependency, works inside the Tauri webview without a
 // server. Routes look like #/accomplishments.
@@ -18,18 +18,4 @@ export function useRoute(): string {
 
 export function navigate(to: string): void {
   if (getRoute() !== to) window.location.hash = to;
-}
-
-export interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
-  to: string;
-  className?: string;
-  children: React.ReactNode;
-}
-
-export function Link({ to, className, children, ...props }: LinkProps): React.JSX.Element {
-  return (
-    <a href={`#${to}`} className={className} {...props}>
-      {children}
-    </a>
-  );
 }

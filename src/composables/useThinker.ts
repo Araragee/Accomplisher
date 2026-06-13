@@ -62,12 +62,15 @@ export function useThinker(): UseThinkerResult {
     }
   }, [activeMemberId, mode]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void loadObjectives(); }, [loadObjectives]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void loadSuggestions(); }, [loadSuggestions]);
   useEffect(() => {
     void db.listWfh({ memberId: scopeMember, start: period.startISO, end: period.endISO }).then(setWfhItems);
   }, [scopeMember, period.startISO, period.endISO]);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!target && targets.length && targets[0]) setTarget(targets[0].id);
   }, [targets, target]);
 

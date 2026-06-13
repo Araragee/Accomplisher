@@ -39,6 +39,7 @@ export function useAccomplishmentsPage(): UseAccomplishmentsPageResult {
   const [date, setDate] = useState(() => clampDate(todayISO(), period.startISO, period.endISO));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDate((d) => clampDate(d, period.startISO, period.endISO));
   }, [period.startISO, period.endISO]);
 

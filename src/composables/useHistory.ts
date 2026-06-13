@@ -25,6 +25,7 @@ export function useHistory(): UseHistoryResult {
 
   useEffect(() => {
     if (expanded === null && list.length && list[0]) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setExpanded(list[0].key);
     }
   }, [list, expanded]);

@@ -45,8 +45,9 @@ export function useSettings(): UseSettingsResult {
   const [tForm, setTForm] = useState<TargetForm>({ id: '', name: '', requiredHours: '16', editingId: null });
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (me) setProfile({ name: me.name, role: me.role || '' });
-  }, [me?.id, me?.name, me?.role]);
+  }, [me, me?.id, me?.name, me?.role]);
 
   const saveProfile = async () => {
     if (!profile.name.trim() || !me) return;

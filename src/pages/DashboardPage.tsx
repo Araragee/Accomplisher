@@ -3,7 +3,7 @@ import { ArrowRight, Compass, Plus } from 'lucide-react';
 import { Page, PageHeader } from '../components/layout';
 import { Badge, Card, CardHeader, Dot, EmptyState, Progress } from '../components/ui';
 import { CoveragePanel } from '../components/features';
-import { Link } from '../router';
+import { Link } from '../components/ui';
 import { useDashboard } from '../composables/useDashboard';
 import { categoryMeta } from '../lib/constants';
 import { fmtDate } from '../lib/format';
