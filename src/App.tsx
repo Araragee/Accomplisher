@@ -11,6 +11,7 @@ import { ThinkerPage } from './pages/ThinkerPage';
 import { TeamPage } from './pages/TeamPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { GroupPage } from './pages/GroupPage';
 
 const ROUTES: Record<string, React.ComponentType> = {
   '/dashboard': DashboardPage,
@@ -20,6 +21,7 @@ const ROUTES: Record<string, React.ComponentType> = {
   '/team': TeamPage,
   '/history': HistoryPage,
   '/settings': SettingsPage,
+  '/group': GroupPage,
 };
 
 function BootScreen(): React.JSX.Element {
