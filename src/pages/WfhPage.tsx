@@ -1,7 +1,7 @@
 import React from 'react';
-import { Laptop, Plus, Trash2 } from 'lucide-react';
+import { Laptop, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Page, PageHeader } from '../components/layout';
-import { Button, Card, CardHeader, CodeTag, EmptyState, Input, Progress, Select } from '../components/ui';
+import { Button, Card, CardHeader, CodeTag, EmptyState, Field, Input, Modal, Progress, Select } from '../components/ui';
 import { PeriodControl, ExportButtons, CoveragePanel } from '../components/features';
 import { useWfhPage } from '../composables/useWfhPage';
 import { WFH_HOURS_OPTIONS } from '../lib/constants';
@@ -12,7 +12,8 @@ const HOURS_OPTIONS = WFH_HOURS_OPTIONS.map((h) => ({ value: h, label: `${h} hrs
 export function WfhPage(): React.JSX.Element {
   const {
     targets, period, setPeriod, items, loading, coverage, report, filename,
-    output, setOutput, targetCode, setTargetCode, hours, setHours, date, setDate, submit, confirmDelete,
+    output, setOutput, targetCode, setTargetCode, hours, setHours, date, setDate,
+    editing, setEditing, submit, saveEdit, confirmDelete,
   } = useWfhPage();
 
   const targetOptions = targets.map((t) => ({ value: t.id, label: t.id }));
@@ -71,6 +72,14 @@ export function WfhPage(): React.JSX.Element {
                     <CodeTag>{w.targetCode}</CodeTag>
                     <button
                       type="button"
+                      aria-label="Edit log"
+                      onClick={() => setEditing(w)}
+                      className="rounded-md p-1 text-faint opacity-0 transition hover:bg-panel hover:text-ink focus-ring group-hover:opacity-100"
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      type="button"
                       aria-label="Delete log"
                       onClick={() => { void confirmDelete(w.id); }}
                       className="rounded-md p-1 text-faint opacity-0 transition hover:bg-danger-soft hover:text-danger focus-ring group-hover:opacity-100"
@@ -100,6 +109,44 @@ export function WfhPage(): React.JSX.Element {
           </div>
         </Card>
       </div>
+
+      <Modal
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        title="Edit WFH log"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button variant="primary" onClick={() => { void saveEdit(); }}>Save</Button>
+          </>
+        }
+      >
+        {editing && (
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); void saveEdit(); }}>
+            <Field label="Output">
+              <Input value={editing.output} onChange={(e) => setEditing({ ...editing, output: e.target.value })} autoFocus />
+            </Field>
+            <div className="flex flex-wrap gap-3">
+              <Field label="Target" className="min-w-36 flex-1">
+                <Select value={editing.targetCode} onChange={(v) => setEditing({ ...editing, targetCode: v })} options={targetOptions} />
+              </Field>
+              <Field label="Hours">
+                <Select value={editing.hours} onChange={(v) => setEditing({ ...editing, hours: v })} options={HOURS_OPTIONS} className="w-28" />
+              </Field>
+            </div>
+            <Field label="Date">
+              <Input
+                type="date"
+                value={editing.date}
+                min={period.startISO}
+                max={period.endISO}
+                onChange={(e) => setEditing({ ...editing, date: e.target.value })}
+                className="w-44"
+              />
+            </Field>
+          </form>
+        )}
+      </Modal>
     </Page>
   );
 }

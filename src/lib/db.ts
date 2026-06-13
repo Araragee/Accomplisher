@@ -217,6 +217,25 @@ export async function addAccomplishment(a: Partial<Accomplishment> & { memberId:
   return { ...row, memberId: row.member_id, createdAt: row.created_at };
 }
 
+export interface AccomplishmentPatch {
+  text: string;
+  category: string;
+  date: string;
+}
+
+export async function updateAccomplishment(id: string, patch: AccomplishmentPatch): Promise<void> {
+  await init();
+  if (tauri && sqlDb) {
+    await sqlDb.execute(
+      'UPDATE payroll_accomplishments SET text = ?, category = ?, date = ? WHERE id = ?',
+      [patch.text, patch.category, patch.date, id]
+    );
+    return;
+  }
+  const all = lsGet<Accomplishment[]>(LS.accomplishments, []);
+  lsSet(LS.accomplishments, all.map((a) => (a.id === id ? { ...a, ...patch } : a)));
+}
+
 export async function deleteAccomplishment(id: string): Promise<void> {
   await init();
   if (tauri && sqlDb) { await sqlDb.execute('DELETE FROM payroll_accomplishments WHERE id = ?', [id]); return; }
@@ -250,7 +269,7 @@ export async function listWfh({ memberId = 'all', start, end }: ListWfhParams): 
     .sort((a, b) => b.date.localeCompare(a.date) || (b.created_at || b.createdAt || 0) - (a.created_at || a.createdAt || 0));
 }
 
-export async function addWfh(w: Partial<WfhLog> & { memberId: string; output: string; hours: string | number; targetCode: string; date: string }): Promise<WfhLog> {
+export async function addWfh(w: Omit<Partial<WfhLog>, 'hours'> & { memberId: string; output: string; hours: string | number; targetCode: string; date: string }): Promise<WfhLog> {
   await init();
   const row = {
     id: w.id || crypto.randomUUID(),
@@ -270,6 +289,29 @@ export async function addWfh(w: Partial<WfhLog> & { memberId: string; output: st
     lsSet(LS.wfh, [row, ...lsGet<WfhLog[]>(LS.wfh, [])]);
   }
   return { ...row, memberId: row.member_id, targetCode: row.target_code, createdAt: row.created_at };
+}
+
+export interface WfhPatch {
+  output: string;
+  hours: string | number;
+  targetCode: string;
+  date: string;
+}
+
+export async function updateWfh(id: string, patch: WfhPatch): Promise<void> {
+  await init();
+  const hours = String(patch.hours);
+  if (tauri && sqlDb) {
+    await sqlDb.execute(
+      'UPDATE wfh_logs SET output = ?, hours = ?, target_code = ?, date = ? WHERE id = ?',
+      [patch.output, hours, patch.targetCode, patch.date, id]
+    );
+    return;
+  }
+  const all = lsGet<WfhLog[]>(LS.wfh, []);
+  lsSet(LS.wfh, all.map((w) =>
+    w.id === id ? { ...w, output: patch.output, hours, target_code: patch.targetCode, date: patch.date } : w
+  ));
 }
 
 export async function deleteWfh(id: string): Promise<void> {

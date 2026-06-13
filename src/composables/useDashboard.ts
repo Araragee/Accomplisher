@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../store/AppContext';
 import { useAccomplishments, useWfh } from '../hooks/useEntries';
 import { useCutoffTrend } from './useCutoffTrend';
@@ -29,15 +29,18 @@ export interface UseDashboardResult {
   recent: Accomplishment[];
   coverage: CoverageResult;
   sparkline: SparklinePoint[];
-  quick: string;
-  setQuick: React.Dispatch<React.SetStateAction<string>>;
-  submitQuick: (e: React.FormEvent) => Promise<void>;
   suggestions: Suggestion[];
   addSuggestion: (s: Suggestion) => Promise<Accomplishment>;
   addAccomplishment: (data: { text: string; category: string; date: string; id?: string }) => Promise<Accomplishment>;
 }
 
-export function useDashboard(): UseDashboardResult {
+export interface UseDashboardOptions {
+  // The Sidebar mounts this hook on every route but never shows suggestions.
+  // Loading them there would spawn the Python ML sidecar on each navigation.
+  withSuggestions?: boolean;
+}
+
+export function useDashboard({ withSuggestions = true }: UseDashboardOptions = {}): UseDashboardResult {
   const { activeMember, activeMemberId, targets } = useApp();
   const period = useMemo<Period>(() => currentCutoffPeriod(), []);
   const acc = useAccomplishments({ memberId: activeMemberId, period });
@@ -45,10 +48,10 @@ export function useDashboard(): UseDashboardResult {
   const coverage = useMemo(() => computeCoverage(wfh.items, targets), [wfh.items, targets]);
   const { rows: trend } = useCutoffTrend({ memberId: activeMemberId, count: 6 });
 
-  const [quick, setQuick] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
 
   useEffect(() => {
+    if (!withSuggestions) return;
     let alive = true;
     db.getSuggestions({ memberId: activeMemberId, mode: 'individual' })
       .then((s) => {
@@ -58,15 +61,7 @@ export function useDashboard(): UseDashboardResult {
     return () => {
       alive = false;
     };
-  }, [activeMemberId, acc.items.length, wfh.items.length]);
-
-  const submitQuick = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const v = quick.trim();
-    if (!v) return;
-    setQuick('');
-    await acc.add({ text: v, category: 'Dev', date: todayISO() });
-  };
+  }, [withSuggestions, activeMemberId, acc.items.length, wfh.items.length]);
 
   const addSuggestion = (s: Suggestion) =>
     acc.add({
@@ -83,9 +78,6 @@ export function useDashboard(): UseDashboardResult {
     recent: acc.items,
     coverage,
     sparkline: trend.map((r) => ({ label: r.label, hours: r.hours })),
-    quick,
-    setQuick,
-    submitQuick,
     suggestions,
     addSuggestion,
     addAccomplishment: acc.add,

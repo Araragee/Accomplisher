@@ -1,7 +1,7 @@
 import React from 'react';
-import { Inbox, Plus, Trash2 } from 'lucide-react';
+import { Inbox, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Page, PageHeader } from '../components/layout';
-import { Badge, Button, Card, Dot, EmptyState, Input, Select } from '../components/ui';
+import { Badge, Button, Card, Dot, EmptyState, Field, Input, Modal, Select } from '../components/ui';
 import { PeriodControl, ExportButtons } from '../components/features';
 import { useAccomplishmentsPage } from '../composables/useAccomplishmentsPage';
 import { CATEGORIES, categoryMeta } from '../lib/constants';
@@ -12,7 +12,8 @@ const CATEGORY_OPTIONS = CATEGORIES.map((c) => ({ value: c.id, label: c.label })
 export function AccomplishmentsPage(): React.JSX.Element {
   const {
     activeMember, period, setPeriod, items, loading, grouped, report, filename,
-    text, setText, category, setCategory, date, setDate, submit, confirmDelete,
+    text, setText, category, setCategory, date, setDate,
+    editing, setEditing, submit, saveEdit, confirmDelete,
   } = useAccomplishmentsPage();
 
   return (
@@ -71,6 +72,14 @@ export function AccomplishmentsPage(): React.JSX.Element {
                         <Badge tone={meta.tone}>{meta.label}</Badge>
                         <button
                           type="button"
+                          aria-label="Edit entry"
+                          onClick={() => setEditing(e)}
+                          className="rounded-md p-1 text-faint opacity-0 transition hover:bg-panel hover:text-ink focus-ring group-hover:opacity-100"
+                        >
+                          <Pencil className="size-4" />
+                        </button>
+                        <button
+                          type="button"
                           aria-label="Delete entry"
                           onClick={() => confirmDelete(e.id)}
                           className="rounded-md p-1 text-faint opacity-0 transition hover:bg-danger-soft hover:text-danger focus-ring group-hover:opacity-100"
@@ -86,6 +95,41 @@ export function AccomplishmentsPage(): React.JSX.Element {
           </div>
         )}
       </Card>
+
+      <Modal
+        open={!!editing}
+        onClose={() => setEditing(null)}
+        title="Edit accomplishment"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button variant="primary" onClick={() => { void saveEdit(); }}>Save</Button>
+          </>
+        }
+      >
+        {editing && (
+          <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); void saveEdit(); }}>
+            <Field label="Accomplishment">
+              <Input value={editing.text} onChange={(e) => setEditing({ ...editing, text: e.target.value })} autoFocus />
+            </Field>
+            <div className="flex flex-wrap gap-3">
+              <Field label="Category" className="flex-1">
+                <Select value={editing.category} onChange={(v) => setEditing({ ...editing, category: v })} options={CATEGORY_OPTIONS} />
+              </Field>
+              <Field label="Date">
+                <Input
+                  type="date"
+                  value={editing.date}
+                  min={period.startISO}
+                  max={period.endISO}
+                  onChange={(e) => setEditing({ ...editing, date: e.target.value })}
+                  className="w-44"
+                />
+              </Field>
+            </div>
+          </form>
+        )}
+      </Modal>
     </Page>
   );
 }

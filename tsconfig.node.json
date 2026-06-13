@@ -5,6 +5,7 @@
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "ESNext",
+    "allowJs": true,
     "skipLibCheck": true,
 
     /* Bundler mode */

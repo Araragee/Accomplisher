@@ -14,7 +14,7 @@ export interface TeamRow {
 }
 
 export interface EditingMember {
-  id: string;
+  id?: string; // absent when adding a new member
   name: string;
   role: string;
   created_at?: number;

@@ -49,7 +49,7 @@ export function Sidebar(): React.JSX.Element {
   const route = useRoute();
   const isActive = (to: string) => route === to || route.startsWith(`${to}/`);
   const { members, activeMember, activeMemberId, setActiveMemberId, theme, toggleTheme } = useApp();
-  const { recent, coverage, sparkline, addAccomplishment, period } = useDashboard();
+  const { recent, coverage, sparkline, addAccomplishment, period } = useDashboard({ withSuggestions: false });
   
   const hasTrend = sparkline.some((d) => d.hours > 0);
 

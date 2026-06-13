@@ -27,7 +27,7 @@ export function DashboardPage(): React.JSX.Element {
             </Link>
           </div>
           {recent.length === 0 ? (
-            <EmptyState title="No accomplishments yet this cutoff" hint="Add one above to get started." />
+            <EmptyState title="No accomplishments yet this cutoff" hint="Use Log Accomplishment in the sidebar to get started." />
           ) : (
             <ul className="divide-y divide-line">
               {recent.slice(0, 6).map((e) => {

@@ -28,20 +28,24 @@ export interface UseWfhPageResult {
   setHours: React.Dispatch<React.SetStateAction<string>>;
   date: string;
   setDate: React.Dispatch<React.SetStateAction<string>>;
+  editing: WfhLog | null;
+  setEditing: React.Dispatch<React.SetStateAction<WfhLog | null>>;
   submit: (e: React.FormEvent) => Promise<void>;
+  saveEdit: () => Promise<void>;
   confirmDelete: (id: string) => Promise<void>;
 }
 
 export function useWfhPage(): UseWfhPageResult {
   const { activeMember, activeMemberId, targets } = useApp();
   const [period, setPeriod] = useState<Period>(() => currentCutoffPeriod());
-  const { items, loading, add, remove } = useWfh({ memberId: activeMemberId, period });
+  const { items, loading, add, update, remove } = useWfh({ memberId: activeMemberId, period });
   const confirm = useConfirm();
 
   const [output, setOutput] = useState('');
   const [targetCode, setTargetCode] = useState('');
   const [hours, setHours] = useState('8.0');
   const [date, setDate] = useState(() => clampDate(todayISO(), period.startISO, period.endISO));
+  const [editing, setEditing] = useState<WfhLog | null>(null);
 
   useEffect(() => {
     if (!targetCode && targets.length && targets[0]) setTargetCode(targets[0].id);
@@ -63,6 +67,17 @@ export function useWfhPage(): UseWfhPageResult {
     if (!v || !targetCode) return;
     setOutput('');
     await add({ output: v, targetCode, hours, date });
+  };
+
+  const saveEdit = async () => {
+    if (!editing || !editing.output.trim() || !editing.targetCode) return;
+    await update(editing.id, {
+      output: editing.output.trim(),
+      hours: editing.hours,
+      targetCode: editing.targetCode,
+      date: editing.date,
+    });
+    setEditing(null);
   };
 
   const confirmDelete = async (id: string) => {
@@ -89,7 +104,10 @@ export function useWfhPage(): UseWfhPageResult {
     setHours,
     date,
     setDate,
+    editing,
+    setEditing,
     submit,
+    saveEdit,
     confirmDelete,
   };
 }

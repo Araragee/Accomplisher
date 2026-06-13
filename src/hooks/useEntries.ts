@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import * as db from '../lib/db';
+import type { AccomplishmentPatch, WfhPatch } from '../lib/db';
 import type { Period } from '../lib/periods';
 import type { Accomplishment, WfhLog } from '../types';
 
@@ -8,11 +9,26 @@ export interface UseEntriesParams {
   period: Period;
 }
 
+// Every mutation follows the same beat: run it, reload this list, then tell other
+// mounted lists (e.g. the sidebar) to refresh via the `entries-changed` event.
+function useEntrySync(reload: () => Promise<void>) {
+  return useCallback(
+    async <T>(run: () => Promise<T>): Promise<T> => {
+      const result = await run();
+      await reload();
+      window.dispatchEvent(new CustomEvent('entries-changed'));
+      return result;
+    },
+    [reload]
+  );
+}
+
 export interface UseAccomplishmentsResult {
   items: Accomplishment[];
   loading: boolean;
   reload: () => Promise<void>;
-  add: (data: { text: string; category: string; date: string; id?: string }) => Promise<Accomplishment>;
+  add: (data: AccomplishmentPatch & { id?: string }) => Promise<Accomplishment>;
+  update: (id: string, data: AccomplishmentPatch) => Promise<void>;
   remove: (id: string) => Promise<void>;
 }
 
@@ -22,14 +38,13 @@ export function useAccomplishments({ memberId, period }: UseEntriesParams): UseA
 
   const reload = useCallback(async () => {
     setLoading(true);
-    const rows = await db.listAccomplishments({ memberId, start: period.startISO, end: period.endISO });
-    setItems(rows);
+    setItems(await db.listAccomplishments({ memberId, start: period.startISO, end: period.endISO }));
     setLoading(false);
   }, [memberId, period.startISO, period.endISO]);
 
-  useEffect(() => {
-    reload();
-  }, [reload]);
+  const sync = useEntrySync(reload);
+
+  useEffect(() => { void reload(); }, [reload]);
 
   useEffect(() => {
     const handler = () => { void reload(); };
@@ -38,32 +53,21 @@ export function useAccomplishments({ memberId, period }: UseEntriesParams): UseA
   }, [reload]);
 
   const add = useCallback(
-    async (data: { text: string; category: string; date: string; id?: string }) => {
-      const row = await db.addAccomplishment({ ...data, memberId });
-      await reload();
-      window.dispatchEvent(new CustomEvent('entries-changed'));
-      return row;
-    },
-    [memberId, reload]
+    (data: AccomplishmentPatch & { id?: string }) => sync(() => db.addAccomplishment({ ...data, memberId })),
+    [sync, memberId]
   );
+  const update = useCallback((id: string, data: AccomplishmentPatch) => sync(() => db.updateAccomplishment(id, data)), [sync]);
+  const remove = useCallback((id: string) => sync(() => db.deleteAccomplishment(id)), [sync]);
 
-  const remove = useCallback(
-    async (id: string) => {
-      await db.deleteAccomplishment(id);
-      await reload();
-      window.dispatchEvent(new CustomEvent('entries-changed'));
-    },
-    [reload]
-  );
-
-  return { items, loading, reload, add, remove };
+  return { items, loading, reload, add, update, remove };
 }
 
 export interface UseWfhResult {
   items: WfhLog[];
   loading: boolean;
   reload: () => Promise<void>;
-  add: (data: { output: string; hours: string | number; targetCode: string; date: string; id?: string }) => Promise<WfhLog>;
+  add: (data: WfhPatch & { id?: string }) => Promise<WfhLog>;
+  update: (id: string, data: WfhPatch) => Promise<void>;
   remove: (id: string) => Promise<void>;
 }
 
@@ -73,14 +77,13 @@ export function useWfh({ memberId, period }: UseEntriesParams): UseWfhResult {
 
   const reload = useCallback(async () => {
     setLoading(true);
-    const rows = await db.listWfh({ memberId, start: period.startISO, end: period.endISO });
-    setItems(rows);
+    setItems(await db.listWfh({ memberId, start: period.startISO, end: period.endISO }));
     setLoading(false);
   }, [memberId, period.startISO, period.endISO]);
 
-  useEffect(() => {
-    reload();
-  }, [reload]);
+  const sync = useEntrySync(reload);
+
+  useEffect(() => { void reload(); }, [reload]);
 
   useEffect(() => {
     const handler = () => { void reload(); };
@@ -89,23 +92,11 @@ export function useWfh({ memberId, period }: UseEntriesParams): UseWfhResult {
   }, [reload]);
 
   const add = useCallback(
-    async (data: { output: string; hours: string | number; targetCode: string; date: string; id?: string }) => {
-      const row = await db.addWfh({ ...data, memberId });
-      await reload();
-      window.dispatchEvent(new CustomEvent('entries-changed'));
-      return row;
-    },
-    [memberId, reload]
+    (data: WfhPatch & { id?: string }) => sync(() => db.addWfh({ ...data, memberId })),
+    [sync, memberId]
   );
+  const update = useCallback((id: string, data: WfhPatch) => sync(() => db.updateWfh(id, data)), [sync]);
+  const remove = useCallback((id: string) => sync(() => db.deleteWfh(id)), [sync]);
 
-  const remove = useCallback(
-    async (id: string) => {
-      await db.deleteWfh(id);
-      await reload();
-      window.dispatchEvent(new CustomEvent('entries-changed'));
-    },
-    [reload]
-  );
-
-  return { items, loading, reload, add, remove };
+  return { items, loading, reload, add, update, remove };
 }

@@ -21,6 +21,8 @@ export interface Accomplishment {
   date: string;
   createdAt?: number;
   created_at?: number;
+  // Legacy localStorage rows used snake_case; the data layer reads both.
+  member_id?: string;
 }
 
 export interface WfhLog {
@@ -32,6 +34,9 @@ export interface WfhLog {
   date: string;
   createdAt?: number;
   created_at?: number;
+  // Legacy localStorage shape.
+  member_id?: string;
+  target_code?: string;
 }
 
 export interface Objective {
@@ -43,6 +48,9 @@ export interface Objective {
   progress: number;
   createdAt?: number;
   created_at?: number;
+  // Legacy localStorage shape.
+  member_id?: string;
+  target_code?: string;
 }
 
 export interface Suggestion {
@@ -53,4 +61,5 @@ export interface Suggestion {
 
 export interface Settings {
   theme: string;
+  activeMemberId?: string;
 }

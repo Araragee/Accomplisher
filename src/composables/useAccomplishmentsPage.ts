@@ -5,12 +5,12 @@ import { useConfirm } from '../components/ui';
 import { currentCutoffPeriod, type Period } from '../lib/periods';
 import { buildReport, slugify } from '../lib/export';
 import { todayISO } from '../lib/format';
-import type { Accomplishment } from '../types';
+import type { Accomplishment, Member } from '../types';
 
 const clampDate = (iso: string, s: string, e: string): string => (iso < s ? s : iso > e ? e : iso);
 
 export interface UseAccomplishmentsPageResult {
-  activeMember: { name: string };
+  activeMember: Member;
   period: Period;
   setPeriod: React.Dispatch<React.SetStateAction<Period>>;
   items: Accomplishment[];
@@ -24,19 +24,23 @@ export interface UseAccomplishmentsPageResult {
   setCategory: React.Dispatch<React.SetStateAction<string>>;
   date: string;
   setDate: React.Dispatch<React.SetStateAction<string>>;
+  editing: Accomplishment | null;
+  setEditing: React.Dispatch<React.SetStateAction<Accomplishment | null>>;
   submit: (e: React.FormEvent) => Promise<void>;
+  saveEdit: () => Promise<void>;
   confirmDelete: (id: string) => Promise<void>;
 }
 
 export function useAccomplishmentsPage(): UseAccomplishmentsPageResult {
   const { activeMember, activeMemberId } = useApp();
   const [period, setPeriod] = useState<Period>(() => currentCutoffPeriod());
-  const { items, loading, add, remove } = useAccomplishments({ memberId: activeMemberId, period });
+  const { items, loading, add, update, remove } = useAccomplishments({ memberId: activeMemberId, period });
   const confirm = useConfirm();
 
   const [text, setText] = useState('');
   const [category, setCategory] = useState('Dev');
   const [date, setDate] = useState(() => clampDate(todayISO(), period.startISO, period.endISO));
+  const [editing, setEditing] = useState<Accomplishment | null>(null);
 
   useEffect(() => {
     setDate((d) => clampDate(d, period.startISO, period.endISO));
@@ -64,6 +68,12 @@ export function useAccomplishmentsPage(): UseAccomplishmentsPageResult {
     await add({ text: v, category, date });
   };
 
+  const saveEdit = async () => {
+    if (!editing || !editing.text.trim()) return;
+    await update(editing.id, { text: editing.text.trim(), category: editing.category, date: editing.date });
+    setEditing(null);
+  };
+
   const confirmDelete = async (id: string) => {
     if (await confirm({ title: 'Delete this entry?', confirmLabel: 'Delete', danger: true })) {
       await remove(id);
@@ -85,7 +95,10 @@ export function useAccomplishmentsPage(): UseAccomplishmentsPageResult {
     setCategory,
     date,
     setDate,
+    editing,
+    setEditing,
     submit,
+    saveEdit,
     confirmDelete,
   };
 }

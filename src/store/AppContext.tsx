@@ -47,8 +47,8 @@ export function AppProvider({ children }: AppProviderProps): React.JSX.Element {
       const settings = db.getSettings();
       setMembers(m);
       setTargets(t);
-      const savedActive = (settings as Record<string, unknown>).activeMemberId as string | undefined;
-      setActiveMemberIdState(m.some((x) => x.id === savedActive) ? savedActive! : 'me');
+      const savedActive = settings.activeMemberId;
+      setActiveMemberIdState(savedActive && m.some((x) => x.id === savedActive) ? savedActive : 'me');
       setThemeState(settings.theme === 'dark' ? 'dark' : 'light');
       setReady(true);
     })();
