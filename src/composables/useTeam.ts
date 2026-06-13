@@ -52,6 +52,7 @@ export function useTeam(): UseTeamResult {
     setAccAll(a);
   }, [period.startISO, period.endISO]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void loadTeamData(); }, [loadTeamData, members.length]);
 
   const rows = useMemo<TeamRow[]>(

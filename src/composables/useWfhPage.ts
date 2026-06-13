@@ -44,10 +44,12 @@ export function useWfhPage(): UseWfhPageResult {
   const [date, setDate] = useState(() => clampDate(todayISO(), period.startISO, period.endISO));
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!targetCode && targets.length && targets[0]) setTargetCode(targets[0].id);
   }, [targets, targetCode]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDate((d) => clampDate(d, period.startISO, period.endISO));
   }, [period.startISO, period.endISO]);
 

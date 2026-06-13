@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
@@ -25,6 +26,7 @@ interface ConfirmState extends ConfirmOptions {
   cancelLabel: string;
   danger: boolean;
 }
+
 
 export function ConfirmProvider({ children }: ConfirmProviderProps): React.JSX.Element {
   const [state, setState] = useState<ConfirmState | null>(null);

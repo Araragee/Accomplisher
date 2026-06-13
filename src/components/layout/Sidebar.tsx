@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Menu, MenuButton, MenuItems, MenuItem, Popover, PopoverButton, PopoverPanel } from '@headlessui/react';
 import { Check, Clock, Compass, LayoutDashboard, ListChecks, Laptop, Settings, Users, Plus, ChevronUp, Moon, Sun, type LucideIcon } from 'lucide-react';
-import { Link, useRoute, navigate } from '../../router';
+import { useRoute, navigate } from '../../router';
+import { Link } from '../ui';
 import { cn } from '../../lib/cn';
 import { useApp } from '../../store/AppContext';
 import { useDashboard } from '../../composables/useDashboard';

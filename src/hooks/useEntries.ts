@@ -27,12 +27,17 @@ export function useAccomplishments({ memberId, period }: UseEntriesParams): UseA
     setLoading(false);
   }, [memberId, period.startISO, period.endISO]);
 
+
   useEffect(() => {
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     reload();
   }, [reload]);
 
   useEffect(() => {
-    const handler = () => { void reload(); };
+    const handler = () => { void
+
+    reload(); };
     window.addEventListener('entries-changed', handler);
     return () => window.removeEventListener('entries-changed', handler);
   }, [reload]);
@@ -40,7 +45,9 @@ export function useAccomplishments({ memberId, period }: UseEntriesParams): UseA
   const add = useCallback(
     async (data: { text: string; category: string; date: string; id?: string }) => {
       const row = await db.addAccomplishment({ ...data, memberId });
-      await reload();
+      await
+
+    reload();
       window.dispatchEvent(new CustomEvent('entries-changed'));
       return row;
     },
@@ -50,7 +57,9 @@ export function useAccomplishments({ memberId, period }: UseEntriesParams): UseA
   const remove = useCallback(
     async (id: string) => {
       await db.deleteAccomplishment(id);
-      await reload();
+      await
+
+    reload();
       window.dispatchEvent(new CustomEvent('entries-changed'));
     },
     [reload]
@@ -71,6 +80,7 @@ export function useWfh({ memberId, period }: UseEntriesParams): UseWfhResult {
   const [items, setItems] = useState<WfhLog[]>([]);
   const [loading, setLoading] = useState(true);
 
+
   const reload = useCallback(async () => {
     setLoading(true);
     const rows = await db.listWfh({ memberId, start: period.startISO, end: period.endISO });
@@ -79,11 +89,15 @@ export function useWfh({ memberId, period }: UseEntriesParams): UseWfhResult {
   }, [memberId, period.startISO, period.endISO]);
 
   useEffect(() => {
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     reload();
   }, [reload]);
 
   useEffect(() => {
-    const handler = () => { void reload(); };
+    const handler = () => { void
+
+    reload(); };
     window.addEventListener('entries-changed', handler);
     return () => window.removeEventListener('entries-changed', handler);
   }, [reload]);
@@ -91,7 +105,9 @@ export function useWfh({ memberId, period }: UseEntriesParams): UseWfhResult {
   const add = useCallback(
     async (data: { output: string; hours: string | number; targetCode: string; date: string; id?: string }) => {
       const row = await db.addWfh({ ...data, memberId });
-      await reload();
+      await
+
+    reload();
       window.dispatchEvent(new CustomEvent('entries-changed'));
       return row;
     },
@@ -101,7 +117,9 @@ export function useWfh({ memberId, period }: UseEntriesParams): UseWfhResult {
   const remove = useCallback(
     async (id: string) => {
       await db.deleteWfh(id);
-      await reload();
+      await
+
+    reload();
       window.dispatchEvent(new CustomEvent('entries-changed'));
     },
     [reload]

@@ -9,3 +9,4 @@ export { EmptyState, type EmptyStateProps } from './EmptyState';
 export { Modal, type ModalProps } from './Modal';
 export { ToastProvider, useToast, type ToastFunction, type ToastOptions } from './toast';
 export { ConfirmProvider, useConfirm, type ConfirmFunction, type ConfirmOptions } from './confirm';
+export { Link, type LinkProps } from './Link';

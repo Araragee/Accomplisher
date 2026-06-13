@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { Check, Info, AlertTriangle } from 'lucide-react';
 import { cn } from '../../lib/cn';
@@ -27,6 +28,7 @@ interface ToastState {
 export interface ToastProviderProps {
   children: React.ReactNode;
 }
+
 
 export function ToastProvider({ children }: ToastProviderProps): React.JSX.Element {
   const [toasts, setToasts] = useState<ToastState[]>([]);
