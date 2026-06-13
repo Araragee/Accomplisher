@@ -20,7 +20,7 @@ export function TeamPage(): React.JSX.Element {
         }
       />
 
-      <Card className="mt-6 p-5">
+      <Card className="mt-4 p-4">
         <StatStrip
           stats={[
             { label: 'Members', value: members.length },

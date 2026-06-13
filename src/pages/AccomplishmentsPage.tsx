@@ -24,7 +24,7 @@ export function AccomplishmentsPage(): React.JSX.Element {
         actions={<ExportButtons report={report} filename={filename} disabled={items.length === 0} />}
       />
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <PeriodControl period={period} onChange={setPeriod} />
         <span className="text-sm text-subtle">
           {items.length} {items.length === 1 ? 'entry' : 'entries'}
@@ -46,7 +46,7 @@ export function AccomplishmentsPage(): React.JSX.Element {
 
       <Card className="mt-4 overflow-hidden">
         {loading ? (
-          <div className="space-y-3 p-5">
+          <div className="space-y-3 p-4">
             {[0, 1, 2].map((i) => (
               <div key={i} className="h-4 animate-pulse rounded bg-panel" style={{ width: `${70 - i * 12}%` }} />
             ))}
@@ -60,7 +60,7 @@ export function AccomplishmentsPage(): React.JSX.Element {
         ) : (
           <div className="divide-y divide-line">
             {grouped.map(([day, entries]) => (
-              <div key={day} className="px-5 py-4">
+              <div key={day} className="px-4 py-3">
                 <div className="mb-2 text-xs font-medium text-subtle">{fmtDate(day, 'EEEE, MMM d')}</div>
                 <ul className="space-y-1">
                   {entries.map((e) => {

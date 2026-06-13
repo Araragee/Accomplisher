@@ -17,7 +17,7 @@ export function HistoryPage(): React.JSX.Element {
       <PageHeader title="History" description={`Past cutoffs for ${activeMember.name}`} />
 
       {hasTrend && (
-        <Card className="mt-6 p-5">
+        <Card className="mt-4 p-4">
           <CardHeader title="IPCR coverage trend" description="Percent of committed hours met per cutoff" />
           <div className="mt-4">
             <CoverageTrend data={trend} />
@@ -55,7 +55,7 @@ export function HistoryPage(): React.JSX.Element {
               </div>
 
               {isOpen && (
-                <div className="border-t border-line px-5 py-4">
+                <div className="border-t border-line px-4 py-3">
                   {accItems.length === 0 ? (
                     <p className="text-sm text-faint">No accomplishments logged this cutoff.</p>
                   ) : (

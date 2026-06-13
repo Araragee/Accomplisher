@@ -31,7 +31,7 @@ export function ThinkerPage(): React.JSX.Element {
       />
 
       {focus.length > 0 && (
-        <div className="mt-5 flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
+        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2 text-sm">
           <Target className="size-4 text-accent" />
           <span className="text-muted">Focus areas {mode === 'team' ? 'for the team' : ''}:</span>
           {focus.map((f) => (
@@ -60,10 +60,10 @@ export function ThinkerPage(): React.JSX.Element {
             <div className="divide-y divide-line">
               {grouped.map(([mid, list]) => (
                 <div key={mid}>
-                  {mode === 'team' && <div className="bg-panel/50 px-5 py-1.5 text-xs font-medium text-subtle">{memberName(mid)}</div>}
+                  {mode === 'team' && <div className="bg-panel/50 px-4 py-1.5 text-xs font-medium text-subtle">{memberName(mid)}</div>}
                   <ul className="divide-y divide-line">
                     {list.map((o) => (
-                      <li key={o.id} className="group flex items-center gap-3 px-5 py-3">
+                      <li key={o.id} className="group flex items-center gap-3 px-4 py-2.5">
                         <Select value={o.status} onChange={(v) => { void setStatus(o, v); }} options={STATUS_OPTIONS} className="w-32" aria-label="Status" />
                         <div className="min-w-0 flex-1">
                           <p className={o.status === 'done' ? 'text-sm text-muted line-through' : 'text-sm text-ink'}>{o.title}</p>
@@ -101,7 +101,7 @@ export function ThinkerPage(): React.JSX.Element {
           ) : (
             <ul className="divide-y divide-line">
               {suggestions.map((s) => (
-                <li key={s.id} className="px-4 py-3.5">
+                <li key={s.id} className="px-4 py-2.5">
                   <p className="text-sm leading-snug text-ink">{s.text}</p>
                   <div className="mt-2 flex items-center justify-between gap-2">
                     <CodeTag>{s.targetCode}</CodeTag>

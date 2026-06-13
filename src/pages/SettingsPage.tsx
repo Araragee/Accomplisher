@@ -12,7 +12,7 @@ interface SectionProps {
 
 function Section({ title, description, children }: SectionProps): React.JSX.Element {
   return (
-    <Card className="p-5">
+    <Card className="p-4">
       <CardHeader title={title} description={description} />
       <div className="mt-4">{children}</div>
     </Card>
@@ -29,7 +29,7 @@ export function SettingsPage(): React.JSX.Element {
     <Page width="narrow">
       <PageHeader title="Settings" />
 
-      <div className="mt-6 space-y-4">
+      <div className="mt-4 space-y-4">
         <Section title="Appearance" description="Light is calm and bright; dark is a warm dusk for long sessions.">
           <SegmentedControl
             value={theme}

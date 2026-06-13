@@ -18,9 +18,9 @@ export function DashboardPage(): React.JSX.Element {
         description={`Cutoff ${period.tab} · ${period.label} · ${left} ${left === 1 ? 'day' : 'days'} left`}
       />
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
+      <div className="mt-4 grid gap-4 lg:grid-cols-[1.5fr_1fr]">
         <Card className="overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4">
+          <div className="flex items-center justify-between px-4 py-3">
             <CardHeader title="Recent" />
             <Link to="/accomplishments" className="flex items-center gap-1 text-sm text-accent hover:underline">
               View all <ArrowRight className="size-3.5" />
@@ -33,7 +33,7 @@ export function DashboardPage(): React.JSX.Element {
               {recent.slice(0, 6).map((e) => {
                 const meta = categoryMeta(e.category);
                 return (
-                  <li key={e.id} className="flex items-start gap-3 px-5 py-3">
+                  <li key={e.id} className="flex items-start gap-3 px-4 py-2.5">
                     <Dot tone={meta.tone} className="mt-1.5" />
                     <p className="flex-1 text-sm text-ink">{e.text}</p>
                     <span className="shrink-0 text-xs text-faint">{fmtDate(e.date, 'MMM d')}</span>
@@ -45,7 +45,7 @@ export function DashboardPage(): React.JSX.Element {
         </Card>
 
         <div className="space-y-4">
-          <Card className="p-5">
+          <Card className="p-4">
             <CardHeader title="IPCR coverage" description={`${coverage.metCount} of ${coverage.targetCount} met`} />
             <div className="mt-4">
               <CoveragePanel coverage={coverage} />
@@ -55,7 +55,7 @@ export function DashboardPage(): React.JSX.Element {
             </div>
           </Card>
 
-          <Card className="p-5">
+          <Card className="p-4">
             <div className="flex items-center justify-between">
               <CardHeader title="Suggested next" />
               <Link to="/thinker" className="text-subtle hover:text-ink" title="Open Task Thinker">

@@ -26,7 +26,7 @@ export function WfhPage(): React.JSX.Element {
         actions={<ExportButtons report={report} filename={filename} disabled={items.length === 0} />}
       />
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <PeriodControl period={period} onChange={setPeriod} />
         <span className="text-sm text-subtle">
           <span className="font-medium tabular-nums text-ink">{coverage.total.toFixed(1)}</span> hours logged
@@ -51,7 +51,7 @@ export function WfhPage(): React.JSX.Element {
 
           <Card className="overflow-hidden">
             {loading ? (
-              <div className="space-y-3 p-5">
+              <div className="space-y-3 p-4">
                 {[0, 1, 2].map((i) => (
                   <div key={i} className="h-4 animate-pulse rounded bg-panel" style={{ width: `${80 - i * 14}%` }} />
                 ))}
@@ -65,7 +65,7 @@ export function WfhPage(): React.JSX.Element {
             ) : (
               <ul className="divide-y divide-line">
                 {items.map((w) => (
-                  <li key={w.id} className="group flex items-center gap-3 px-5 py-3 transition-colors hover:bg-panel/60">
+                  <li key={w.id} className="group flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-panel/60">
                     <span className="w-16 shrink-0 font-mono text-xs tabular-nums text-subtle">{fmtDate(w.date, 'MMM d')}</span>
                     <p className="flex-1 text-sm text-ink">{w.output}</p>
                     <span className="shrink-0 font-mono text-xs tabular-nums text-muted">{w.hours} hrs</span>
@@ -93,12 +93,12 @@ export function WfhPage(): React.JSX.Element {
           </Card>
         </div>
 
-        <Card className="h-fit p-5">
+        <Card className="h-fit p-4">
           <CardHeader title="IPCR coverage" description={`${coverage.metCount} of ${coverage.targetCount} targets met`} />
           <div className="mt-4">
             <CoveragePanel coverage={coverage} />
           </div>
-          <div className="mt-5 border-t border-line pt-4">
+          <div className="mt-4 border-t border-line pt-3">
             <div className="mb-1.5 flex items-baseline justify-between">
               <span className="text-xs text-subtle">Total this period</span>
               <span className="font-mono text-xs tabular-nums text-muted">
