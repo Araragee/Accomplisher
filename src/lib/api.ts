@@ -1,8 +1,8 @@
 import { io, Socket } from 'socket.io-client';
 
 // In a real app, this would be loaded from settings or an env variable.
-// For now, we assume the NAS backend runs on a known IP/port.
-const NAS_URL = localStorage.getItem('nas_backend_url') || 'http://localhost:3001';
+// For now, we assume the NAS backend runs on a known IP/port or from Vite env.
+const NAS_URL = localStorage.getItem('nas_backend_url') || import.meta.env.VITE_NAS_BACKEND_URL || 'http://localhost:3001';
 
 class APIClient {
   private socket: Socket | null = null;

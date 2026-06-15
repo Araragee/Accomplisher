@@ -2,8 +2,11 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
-const sqlite3 = require('sqlite3').verbose();
+const { createClient } = require('@supabase/supabase-js');
 
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabase = createClient(supabaseUrl, supabaseKey);
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -13,23 +16,17 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-const db = new sqlite3.Database('./groups.db');
+// Supabase handles database schema and migrations
 
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS messages (
-    id TEXT PRIMARY KEY,
-    group_id TEXT,
-    author TEXT,
-    content TEXT,
-    time TEXT
-  )`);
-});
+app.get('/api/groups/:id/messages', async (req, res) => {
+  const { data, error } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('group_id', req.params.id)
+    .order('created_at', { ascending: true });
 
-app.get('/api/groups/:id/messages', (req, res) => {
-  db.all('SELECT * FROM messages WHERE group_id = ? ORDER BY rowid ASC', [req.params.id], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data || []);
 });
 
 io.on('connection', (socket) => {
@@ -53,8 +50,15 @@ io.on('connection', (socket) => {
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
     
-    db.run('INSERT INTO messages (id, group_id, author, content, time) VALUES (?, ?, ?, ?, ?)', 
-      [msg.id, data.groupId, msg.author, msg.content, msg.time]);
+    const { error } = await supabase.from('messages').insert([{
+      id: msg.id,
+      group_id: data.groupId,
+      author: msg.author,
+      content: msg.content,
+      time: msg.time
+    }]);
+
+    if (error) console.error('Error inserting message:', error.message);
 
     // Broadcast to everyone else in the group
     socket.to(data.groupId).emit('message', msg);

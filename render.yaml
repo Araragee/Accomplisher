@@ -1,0 +1,30 @@
+services:
+  # The Node.js Express & Socket.io backend
+  - type: web
+    name: accomplisher-backend
+    env: node
+    rootDir: nas-backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: DATABASE_PATH
+        value: /data/groups.db
+    # Render disks require a paid instance type, e.g., starter or higher
+    # If using free tier, comment out the disk block, but be aware your sqlite DB will reset
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+
+  # The Vite React frontend
+  - type: web
+    name: accomplisher-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_NAS_BACKEND_URL
+        fromService:
+          type: web
+          name: accomplisher-backend
+          envVarKey: RENDER_EXTERNAL_URL

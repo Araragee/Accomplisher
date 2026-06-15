@@ -9,7 +9,10 @@
     "type-check": "tsc -b",
     "lint": "eslint .",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "deploy:db": "supabase db push",
+    "deploy:render": "render blueprint apply",
+    "deploy": "npm run deploy:db && npm run deploy:render"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",
