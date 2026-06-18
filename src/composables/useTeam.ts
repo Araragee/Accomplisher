@@ -54,15 +54,27 @@ export function useTeam(): UseTeamResult {
 
   useEffect(() => { void loadTeamData(); }, [loadTeamData, members.length]);
 
-  const rows = useMemo<TeamRow[]>(
-    () =>
-      members.map((m) => ({
-        member: m,
-        coverage: computeCoverage(wfhAll.filter((w) => w.memberId === m.id), targets),
-        logged: accAll.filter((a) => a.memberId === m.id).length,
-      })),
-    [members, wfhAll, accAll, targets]
-  );
+  const rows = useMemo<TeamRow[]>(() => {
+    // Bolt Optimization: Replace O(N*M) nested loop with O(N+M) hash map lookup
+    const wfhByMember = new Map<string, WfhLog[]>();
+    const accCountByMember = new Map<string, number>();
+
+    wfhAll.forEach((w) => {
+      const arr = wfhByMember.get(w.memberId) || [];
+      arr.push(w);
+      wfhByMember.set(w.memberId, arr);
+    });
+
+    accAll.forEach((a) => {
+      accCountByMember.set(a.memberId, (accCountByMember.get(a.memberId) || 0) + 1);
+    });
+
+    return members.map((m) => ({
+      member: m,
+      coverage: computeCoverage(wfhByMember.get(m.id) || [], targets),
+      logged: accCountByMember.get(m.id) || 0,
+    }));
+  }, [members, wfhAll, accAll, targets]);
 
   const avgCoverage = rows.length
     ? Math.round(rows.reduce((s, r) => s + r.coverage.overallPct, 0) / rows.length)
